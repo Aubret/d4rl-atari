@@ -43,9 +43,7 @@ def _load(name, dir_path):
 def download_dataset(env, index, epoch, base_dir=BASE_DIR):
     dir_path = get_dir_path(env, index, epoch, base_dir)
     _download('observation', env, index, epoch, dir_path)
-    _download('action', env, index, epoch, dir_path)
-    _download('reward', env, index, epoch, dir_path)
-    _download('terminal', env, index, epoch, dir_path)
+    _download('terminals', env, index, epoch, dir_path)
 
 
 def _stack(observations, terminals, n_channels=4):
@@ -87,8 +85,6 @@ class OfflineEnv(gym.Env):
 
     def get_dataset(self):
         observation_stack = []
-        action_stack = []
-        reward_stack = []
         terminal_stack = []
         for epoch in range(self.start_epoch, self.last_epoch + 1):
             path = get_dir_path(self.game, self.index, epoch)
@@ -97,30 +93,20 @@ class OfflineEnv(gym.Env):
                 download_dataset(self.game, self.index, epoch)
 
             observations = _load('observation', path)
-            actions = _load('action', path)
-            rewards = _load('reward', path)
             terminals = _load('terminal', path)
 
             # sanity check
             assert observations.shape == (1000000, 84, 84)
-            assert actions.shape == (1000000, )
-            assert rewards.shape == (1000000, )
             assert terminals.shape == (1000000, )
 
             observation_stack.append(observations)
-            action_stack.append(actions)
-            reward_stack.append(rewards)
             terminal_stack.append(terminals)
 
         if len(observation_stack) > 1:
             observations = np.vstack(observation_stack)
-            actions = np.vstack(action_stack).reshape(-1)
-            rewards = np.vstack(reward_stack).reshape(-1)
             terminals = np.vstack(terminal_stack).reshape(-1)
         else:
             observations = observation_stack[0]
-            actions = action_stack[0]
-            rewards = reward_stack[0]
             terminals = terminal_stack[0]
 
         # memory-efficient stacking
@@ -131,8 +117,6 @@ class OfflineEnv(gym.Env):
 
         data_dict = {
             'observations': observations,
-            'actions': actions,
-            'rewards': rewards,
             'terminals': terminals
         }
 

@@ -16,7 +16,7 @@ You can access to the Atari datasets just like d4rl only with few lines of codes
 
 ## install
 ```
-$ pip install git+https://github.com/takuseno/d4rl-atari
+$ pip install git+https://github.com/Aubret/d4rl-atari
 ```
 
 ## usage
